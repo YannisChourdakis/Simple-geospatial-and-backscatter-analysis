@@ -30,7 +30,11 @@ p_ship_track  <- ggplot(
   bottom_clean, aes(latitude, longitude)) +
   geom_point(size= .5)+
   theme_minimal()+
-  labs(x = "Longitude", y = "Latitude")
+  labs(title = "Trackline of the research ship", x = "Longitude", y = "Latitude") +
+  annotate(geom="point", x=38.05, y=-73.235, size=7, shape=21, fill="transparent") +
+  annotate(geom="text", x=38.10, y=-73.25,label="Starting point") +
+  annotate(geom="point", x=38.295, y=-74, size=7, shape=21, fill="transparent") +
+  annotate(geom="text", x=38.25, y=-74,label="End point")
 plot(p_ship_track)
 
 # Plot the depth of the sea floor along the ship's track
@@ -38,9 +42,9 @@ p_bathymetry  <-  ggplot(bottom_clean, aes(distance_along, depth)) +
   geom_point(size= .5) +
   scale_y_reverse() +
   theme_minimal() +
-  labs(title = "Offshore anatomy along ship's trackline", x = "Distance along trackline (m)", y = "Depth (m)") +
+  labs(title = "Depth of continental shelf, break and deep sea", x = "Distance along trackline (m)", y = "Depth (m)") +
   geom_hline(yintercept = c(184, 2000), colour = "orange", alpha = .5) + 
-  annotate("text", x = c(50000), y = c(90, 1100, 2100), label = c("Continental Shelf", "Continental Slope", "Deep Sea"), colour = "grey80", size = 4) +
+  annotate("text", x = c(50000), y = c(90, 1100, 2100), label = c("Continental Shelf", "Slope", "Deep Sea"), colour = "grey80", size = 4) +
   annotate(geom="point", x=28990, y=140, size=10, shape=21, fill="transparent") +
   annotate(geom="text", x=28990, y=15,label="Break")
 plot(p_bathymetry)
@@ -58,6 +62,7 @@ glimpse(acoustic)
 # Create a list of variables to keep
 variables_keep <- c("Interval", "Layer", "Sv_mean", "Frequency", 
           "Date_M", "Time_S", "Time_E", "Lat_M", "Lon_M")
+
 # Select, rename, filter, mutate, and arrange the data 
 Sv_layer1 <- acoustic %>%
   select(one_of(variables_keep)) %>% 
@@ -76,6 +81,7 @@ Sv <- Sv_layer1 %>%
        Distance_along = cumsum(Distance_between)) %>%
   na_if(-999.0) %>% 
   mutate(Time_interval = interval(Datetime_start, Datetime_end))
+
 # Glimpse the data
 glimpse(Sv)
 
@@ -109,7 +115,7 @@ glimpse(Sv_and_depth)
 # Top panel
 Sv_mean_plot <- ggplot(Sv_and_depth, aes(y= Sv_mean, Distance_along)) +
   geom_line(size=0.5) +
-  labs(y=expression(mean~volume~backscatter~S[v]~(dB))) +
+  labs(title= "Location of fish population\n", y=expression(mean~volume~backscatter~S[v]~(dB))) +
   theme_minimal()+
   theme(axis.title.x=element_blank())+
   geom_vline(xintercept = 26997, colour = "orange", alpha = .5) +
@@ -130,6 +136,11 @@ bathymetry <- ggplot(Sv_and_depth, aes(y=depth_plot, x=Distance_along)) +
 # Display the two panels in one figure
 Sv_mean_plot / bathymetry
 
+# Where do you think the fish are along this track line?
+
+# Options: Shelf, Shelf Break, Offshore
+
+(where_are_the_fishes <- "Shelf")
 
 
 
